@@ -1,0 +1,704 @@
+<!-- Hero Section -->
+<style>
+    /* Increase font sizes by +2 for main elements */
+    .display-4 {
+        font-size: 4.5rem !important;
+    }
+    .lead {
+        font-size: 2.2rem !important;
+    }
+    .btn-lg {
+        font-size: 2.2rem !important;
+        padding: 1rem 2rem !important;
+    }
+    .alert {
+        font-size: 2.2rem !important;
+    }
+    .alert strong {
+        font-size: 2.2rem !important;
+    }
+    
+    /* Candidate card elements */
+    .card-title {
+        font-size: 2.8rem !important;
+        font-weight: bold !important;
+    }
+    .card-text {
+        font-size: 2.3rem !important;
+    }
+    .category-badge {
+        font-size: 2.2rem !important;
+        padding: 0.8rem 1.2rem !important;
+    }
+    .vote-btn, .btn-outline-primary {
+        font-size: 2.2rem !important;
+        padding: 1rem 2rem !important;
+    }
+    
+    /* Section headers */
+    h2 {
+        font-size: 3.5rem !important;
+    }
+    h3 {
+        font-size: 3rem !important;
+    }
+    h5 {
+        font-size: 2.8rem !important;
+    }
+    
+    /* Information section */
+    .bg-light p {
+        font-size: 2.3rem !important;
+    }
+    
+    /* Empty state */
+    .text-muted {
+        font-size: 2.3rem !important;
+    }
+    
+    /* Search section */
+    .search-card {
+        border-radius: 15px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    }
+    .search-input {
+        font-size: 1.8rem !important;
+        padding: 15px 20px !important;
+        border-radius: 10px !important;
+    }
+    .search-btn {
+        font-size: 1.8rem !important;
+        padding: 15px 30px !important;
+        border-radius: 10px !important;
+    }
+    .search-label {
+        font-size: 1.6rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 12px !important;
+    }
+    .search-title {
+        font-size: 2.2rem !important;
+        font-weight: 700 !important;
+    }
+    .nomination-card {
+        transition: transform 0.2s ease;
+    }
+    .nomination-card:hover {
+        transform: translateY(-5px);
+    }
+    .hidden {
+        display: none !important;
+    }
+    
+    /* Voting status badges */
+    .badge {
+        font-weight: 600 !important;
+    }
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+    
+    /* Expired voting styles */
+    .voting-expired {
+        opacity: 0.8;
+        filter: grayscale(20%);
+    }
+    
+    .voting-expired .card {
+        border: 2px solid #dc3545 !important;
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.3) !important;
+    }
+    
+    .voting-expired .card-title {
+        color: #6c757d !important;
+    }
+    
+    /* Active voting styles */
+    .voting-active .card {
+        border: 2px solid #198754 !important;
+        box-shadow: 0 0 15px rgba(25, 135, 84, 0.2) !important;
+    }
+    
+    /* Alert improvements */
+    .alert {
+        border-radius: 15px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    }
+    
+    .alert-danger {
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%) !important;
+        border: 1px solid #feb2b2 !important;
+    }
+    
+    .alert-info {
+        background: linear-gradient(135deg, #f0f9ff 0%, #bae6fd 100%) !important;
+        border: 1px solid #7dd3fc !important;
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%) !important;
+        border: 1px solid #86efac !important;
+    }
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+    .badge.bg-secondary {
+        background-color: #6c757d !important;
+        color: white !important;
+    }
+    
+    /* Overall status badges */
+    .badge.fs-6 {
+        font-size: 1.2rem !important;
+        padding: 0.8rem 1.5rem !important;
+        border-radius: 25px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .badge.fs-6:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
+    }
+    
+    .badge.bg-success {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%) !important;
+        border: 2px solid #198754 !important;
+    }
+    
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%) !important;
+        border: 2px solid #dc3545 !important;
+    }
+</style>
+
+<section class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">
+            <i class="fas fa-vote-yea me-3"></i>Bình Chọn Đề Cử
+        </h1>
+        <p class="lead mb-4">Hãy bình chọn cho những ứng viên xuất sắc nhất trong các lĩnh vực khác nhau</p>
+        
+        <!-- Overall Voting Status -->
+        <% 
+        const totalCategories = categories.length;
+        const activeCategories = categories.filter(c => c.voting_status === 'active').length;
+        const expiredCategories = categories.filter(c => c.voting_status === 'expired').length;
+        %>
+        
+        <div class="row justify-content-center mb-3">
+            <div class="col-md-10">
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <div class="text-center">
+                        <div class="badge bg-success fs-6 px-3 py-2">
+                            <i class="fas fa-play me-1"></i>
+                            <%= activeCategories %> cuộc bình chọn đang diễn ra
+                        </div>
+                    </div>
+                            <% if (expiredCategories > 0) { %>
+        <div class="text-center">
+            <div class="badge bg-danger fs-6 px-3 py-2">
+                <i class="fas fa-stop me-1"></i>
+                <%= expiredCategories %> cuộc bình chọn đã kết thúc
+            </div>
+        </div>
+        <% } %>
+        
+        <% if (expiredCategories === totalCategories && totalCategories > 0) { %>
+        <div class="alert alert-warning mt-3" style="max-width: 600px; margin: 0 auto;">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                <h5 class="alert-heading">Tất cả cuộc bình chọn đã kết thúc!</h5>
+                <p class="mb-0">Hiện tại không có cuộc bình chọn nào đang diễn ra. Vui lòng quay lại sau.</p>
+            </div>
+        </div>
+        <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="/results" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-chart-bar me-2"></i>Xem Kết Quả
+                    </a>
+                    <% if (user) { %>
+                        <a href="/suggest-nomination" class="btn btn-outline-success btn-lg">
+                            <i class="fas fa-plus me-2"></i>Đề Cử Thêm
+                        </a>
+                    <% } else { %>
+                        <a href="/login" class="btn btn-outline-success btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Đăng Nhập Để Bình Chọn
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <% if (user) { %>
+            <div class="alert alert-light" role="alert">
+                <i class="fas fa-user-check me-2"></i>
+                Xin chào <strong><%= user.username %></strong>! Bạn có thể bình chọn cho các đề cử bên dưới.
+            </div>
+        <% } %>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card search-card">
+                    <div class="card-body">
+                        <h4 class="text-center mb-4 search-title">
+                            <i class="fas fa-search me-2"></i>Tìm Kiếm Ứng Viên
+                        </h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="searchName" class="form-label search-label">
+                                        <i class="fas fa-user me-2"></i>Tên ứng viên
+                                    </label>
+                                    <input type="text" class="form-control search-input" id="searchName" 
+                                           placeholder="Nhập tên ứng viên...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="searchCategory" class="form-label search-label">
+                                        <i class="fas fa-tag me-2"></i>Khoa/Lĩnh vực
+                                    </label>
+                                    <select class="form-select search-input" id="searchCategory">
+                                        <option value="">Tất cả khoa</option>
+                                        <% categories.forEach(category => { %>
+                                            <option value="<%= category.name %>"><%= category.name %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-primary me-2 search-btn" onclick="performSearch()">
+                                <i class="fas fa-search me-2"></i>Tìm kiếm
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary search-btn" onclick="clearSearch()">
+                                <i class="fas fa-times me-2"></i>Xóa bộ lọc
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Nominations Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-list me-2"></i>Danh Sách Đề Cử
+                </h2>
+                <p class="text-center text-muted">Chọn và bình chọn cho những ứng viên bạn yêu thích</p>
+                <div id="searchResults" class="text-center mb-3" style="display: none;">
+                    <span class="badge bg-info" style="font-size: 1.3rem; padding: 8px 16px;">
+                        <i class="fas fa-filter me-2"></i>Đang hiển thị kết quả tìm kiếm
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div id="nominationsContainer">
+            <% 
+            // Group nominations by category
+            const nominationsByCategory = {};
+            nominations.forEach(nom => {
+                if (!nominationsByCategory[nom.category]) {
+                    nominationsByCategory[nom.category] = [];
+                }
+                nominationsByCategory[nom.category].push(nom);
+            });
+            %>
+
+            <% categories.forEach(category => { %>
+                <div class="mb-5 category-section" data-category="<%= category.name %>">
+                    <h3 class="mb-4 text-primary">
+                        <i class="fas fa-tag me-2"></i><%= category.name %>
+                        <% if (category.nomination_count > 0) { %>
+                            <span class="badge bg-info ms-2" style="font-size: 1.2rem;">
+                                <%= category.nomination_count %> đề cử
+                            </span>
+                        <% } %>
+                    </h3>
+                    
+                    <% if (category.voting_status === 'expired') { %>
+                        <div class="alert alert-danger mb-3" style="border-left: 5px solid #dc3545;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-ban fa-2x me-3 text-danger"></i>
+                                <div>
+                                    <h5 class="alert-heading mb-1">
+                                        <strong>Cuộc bình chọn này đã kết thúc</strong>
+                                    </h5>
+                                    <p class="mb-0">
+                                        Thời gian kết thúc: <strong><%= new Date(category.end_time).toLocaleString('vi-VN') %></strong>
+                                    </p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Không thể bình chọn thêm cho danh mục này
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    <% } else if (category.end_time) { %>
+                        <div class="alert alert-info mb-3" style="border-left: 5px solid #0dcaf0;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-hourglass-half fa-2x me-3 text-info"></i>
+                                <div>
+                                    <h5 class="alert-heading mb-1">
+                                        <strong>Cuộc bình chọn đang diễn ra</strong>
+                                    </h5>
+                                    <p class="mb-0">
+                                        Kết thúc: <strong><%= new Date(category.end_time).toLocaleString('vi-VN') %></strong>
+                                    </p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Hãy nhanh tay bình chọn cho ứng viên yêu thích
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="alert alert-success mb-3" style="border-left: 5px solid #198754;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-infinity fa-2x me-3 text-success"></i>
+                                <div>
+                                    <h5 class="alert-heading mb-1">
+                                        <strong>Cuộc bình chọn không giới hạn thời gian</strong>
+                                    </h5>
+                                    <p class="mb-0">
+                                        Bạn có thể bình chọn bất cứ lúc nào
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <div class="row g-4">
+                        <% if (nominationsByCategory[category.name] && nominationsByCategory[category.name].length > 0) { %>
+                            <% nominationsByCategory[category.name].forEach(nomination => { %>
+                            <div class="col-md-6 col-lg-4 nomination-item <%= nomination.voting_status === 'expired' ? 'voting-expired' : 'voting-active' %>" 
+                                 data-name="<%= nomination.name.toLowerCase() %>" 
+                                 data-category="<%= nomination.category %>">
+                                <div class="card nomination-card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <i class="fas fa-user-circle fa-4x text-primary"></i>
+                                        </div>
+                                        <h5 class="card-title fw-bold"><%= nomination.name %></h5>
+                                        <p class="card-text text-muted"><%= nomination.description %></p>
+                                        
+                                        <!-- Voting Status Badge -->
+                                        <% if (nomination.voting_status === 'expired') { %>
+                                            <div class="mb-3">
+                                                <div class="alert alert-danger py-2 px-3 mb-0" style="border-radius: 20px;">
+                                                    <i class="fas fa-ban me-2"></i>
+                                                    <strong>Cuộc bình chọn đã kết thúc</strong>
+                                                </div>
+                                            </div>
+                                        <% } else if (nomination.end_time) { %>
+                                            <div class="mb-3">
+                                                <div class="alert alert-warning py-2 px-3 mb-0" style="border-radius: 20px;">
+                                                    <i class="fas fa-hourglass-half me-2"></i>
+                                                    <strong>Kết thúc: <%= new Date(nomination.end_time).toLocaleString('vi-VN') %></strong>
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <% if (user) { %>
+                                            <% if (nomination.voting_status === 'active') { %>
+                                                <div class="d-grid">
+                                                    <button class="btn btn-primary vote-btn" 
+                                                            onclick="vote(<%= nomination.id %>)"
+                                                            id="vote-btn-<%= nomination.id %>">
+                                                        <i class="fas fa-vote-yea me-2"></i>Bình chọn
+                                                    </button>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="d-grid">
+                                                    <button class="btn btn-danger vote-btn" disabled 
+                                                            style="cursor: not-allowed; opacity: 0.7;">
+                                                        <i class="fas fa-ban me-2"></i>Cuộc bình chọn đã kết thúc
+                                                    </button>
+                                                    <small class="text-muted mt-2">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        Không thể bình chọn cho đề cử này
+                                                    </small>
+                                                </div>
+                                            <% } %>
+                                        <% } else { %>
+                                            <% if (nomination.voting_status === 'expired') { %>
+                                                <div class="d-grid">
+                                                    <button class="btn btn-danger" disabled 
+                                                            style="cursor: not-allowed; opacity: 0.7;">
+                                                        <i class="fas fa-ban me-2"></i>Cuộc bình chọn đã kết thúc
+                                                    </button>
+                                                    <small class="text-muted mt-2">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        Không thể bình chọn cho đề cử này
+                                                    </small>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="d-grid">
+                                                    <a href="/login" class="btn btn-outline-primary">
+                                                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập để bình chọn
+                                                    </a>
+                                                </div>
+                                            <% } %>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="col-12">
+                                <div class="text-center py-4">
+                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Chưa có đề cử nào trong danh mục này</h5>
+                                    <p class="text-muted">Hãy quay lại sau khi có đề cử mới được thêm vào.</p>
+                                                                         <% if (user && user.role === 'admin') { %>
+                                         <a href="/manage-categories" class="btn btn-outline-primary">
+                                             <i class="fas fa-plus me-2"></i>Tạo Danh Mục
+                                         </a>
+                                     <% } %>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+
+            <% if (categories.length === 0) { %>
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Chưa có danh mục nào</h4>
+                    <p class="text-muted">Hãy quay lại sau khi có danh mục mới.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- Information Section -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="p-4">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h5>Bảo mật</h5>
+                    <p class="text-muted">Hệ thống bảo mật cao, đảm bảo tính minh bạch trong bình chọn</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="p-4">
+                    <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
+                    <h5>Kết quả chính xác</h5>
+                    <p class="text-muted">Thống kê chính xác, cập nhật theo thời gian thực</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="p-4">
+                    <i class="fas fa-mobile-alt fa-3x text-info mb-3"></i>
+                    <h5>Dễ sử dụng</h5>
+                    <p class="text-muted">Giao diện thân thiện, dễ dàng sử dụng trên mọi thiết bị</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function vote(nominationId) {
+    const button = document.getElementById(`vote-btn-${nominationId}`);
+    const originalText = button.innerHTML;
+    
+    // Disable button and show loading
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+    
+    fetch('/vote', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ nominationId: nominationId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success state
+            button.innerHTML = '<i class="fas fa-check me-2"></i>Đã bình chọn';
+            button.className = 'btn btn-success vote-btn';
+            button.disabled = true;
+            
+            // Show success message
+            showAlert('Bình chọn thành công!', 'success');
+        } else {
+            throw new Error(data.error || 'Có lỗi xảy ra');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        // Check if it's a voting expired error
+        if (error.message && error.message.includes('Cuộc bình chọn đã kết thúc')) {
+            showAlert(error.message, 'warning');
+            // Update button to show expired state
+            button.innerHTML = '<i class="fas fa-ban me-2"></i>Không thể bình chọn';
+            button.className = 'btn btn-secondary vote-btn';
+            button.disabled = true;
+        } else {
+            showAlert('Có lỗi xảy ra khi bình chọn. Vui lòng thử lại.', 'danger');
+        }
+    });
+}
+
+function performSearch() {
+    const searchName = document.getElementById('searchName').value.toLowerCase().trim();
+    const searchCategory = document.getElementById('searchCategory').value;
+    const nominationItems = document.querySelectorAll('.nomination-item');
+    const categorySections = document.querySelectorAll('.category-section');
+    let visibleCount = 0;
+    
+    // Track which categories have visible items
+    const visibleCategories = new Set();
+    
+    nominationItems.forEach(item => {
+        const name = item.getAttribute('data-name');
+        const category = item.getAttribute('data-category');
+        
+        const nameMatch = !searchName || name.includes(searchName);
+        const categoryMatch = !searchCategory || category === searchCategory;
+        
+        if (nameMatch && categoryMatch) {
+            item.classList.remove('hidden');
+            visibleCount++;
+            visibleCategories.add(category);
+        } else {
+            item.classList.add('hidden');
+        }
+    });
+    
+    // Hide/show category sections based on visible items
+    categorySections.forEach(section => {
+        const sectionCategory = section.getAttribute('data-category');
+        if (visibleCategories.has(sectionCategory)) {
+            section.classList.remove('hidden');
+        } else {
+            section.classList.add('hidden');
+        }
+    });
+    
+    // Update search results indicator
+    const searchResultsDiv = document.getElementById('searchResults');
+    if (searchName || searchCategory) {
+        searchResultsDiv.style.display = 'block';
+        const badge = searchResultsDiv.querySelector('.badge');
+        badge.innerHTML = `<i class="fas fa-filter me-2"></i>Đang hiển thị ${visibleCount} kết quả tìm kiếm`;
+    } else {
+        searchResultsDiv.style.display = 'none';
+    }
+    
+    // Show no results message if needed
+    showNoResultsMessage(visibleCount);
+}
+
+function clearSearch() {
+    document.getElementById('searchName').value = '';
+    document.getElementById('searchCategory').value = '';
+    
+    // Show all items
+    const nominationItems = document.querySelectorAll('.nomination-item');
+    nominationItems.forEach(item => {
+        item.classList.remove('hidden');
+    });
+    
+    // Show all category sections
+    const categorySections = document.querySelectorAll('.category-section');
+    categorySections.forEach(section => {
+        section.classList.remove('hidden');
+    });
+    
+    // Hide search results indicator
+    document.getElementById('searchResults').style.display = 'none';
+    
+    // Hide no results message
+    const noResultsDiv = document.getElementById('noResultsMessage');
+    if (noResultsDiv) {
+        noResultsDiv.remove();
+    }
+}
+
+function showNoResultsMessage(visibleCount) {
+    // Remove existing no results message
+    const existingMessage = document.getElementById('noResultsMessage');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    if (visibleCount === 0) {
+        const noResultsDiv = document.createElement('div');
+        noResultsDiv.id = 'noResultsMessage';
+        noResultsDiv.className = 'text-center py-5';
+        noResultsDiv.innerHTML = `
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">Không tìm thấy kết quả</h4>
+            <p class="text-muted">Hãy thử tìm kiếm với từ khóa khác.</p>
+        `;
+        
+        const container = document.getElementById('nominationsContainer');
+        container.appendChild(noResultsDiv);
+    }
+}
+
+// Add event listeners for real-time search
+document.addEventListener('DOMContentLoaded', function() {
+    const searchNameInput = document.getElementById('searchName');
+    const searchCategorySelect = document.getElementById('searchCategory');
+    
+    // Real-time search on input change
+    searchNameInput.addEventListener('input', function() {
+        if (this.value.length >= 2 || this.value.length === 0) {
+            performSearch();
+        }
+    });
+    
+    // Search on category change
+    searchCategorySelect.addEventListener('change', performSearch);
+});
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show m-3`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.insertBefore(alertDiv, document.querySelector('main'));
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>

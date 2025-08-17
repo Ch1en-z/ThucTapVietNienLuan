@@ -1,0 +1,217 @@
+<!-- Trash History Section -->
+<style>
+    .card-title {
+        font-size: 2.8rem !important;
+        font-weight: bold !important;
+    }
+    .card-text {
+        font-size: 2.3rem !important;
+    }
+    .badge {
+        font-size: 2rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+    .btn {
+        font-size: 2rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+    h2 {
+        font-size: 3.5rem !important;
+    }
+    .text-muted {
+        font-size: 2rem !important;
+    }
+    .table th {
+        font-size: 2.2rem !important;
+    }
+    .table td {
+        font-size: 1.8rem !important;
+    }
+</style>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-trash me-2"></i>Lịch Sử Xóa
+                </h2>
+                <p class="text-center text-muted">Khôi phục các danh mục và đề cử đã bị xóa</p>
+            </div>
+        </div>
+
+        <!-- Deleted Categories -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="fas fa-folder me-2"></i>Danh Mục Đã Xóa
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <% if (deletedCategories.length === 0) { %>
+                            <div class="text-center py-4">
+                                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Không có danh mục nào đã bị xóa</p>
+                            </div>
+                        <% } else { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Tên Danh Mục</th>
+                                            <th>Số Đề Cử</th>
+                                            <th>Ngày Xóa</th>
+                                            <th>Thao Tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% deletedCategories.forEach(category => { %>
+                                            <tr>
+                                                <td>
+                                                    <strong><%= category.name %></strong>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info"><%= category.nomination_count %></span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <%= new Date(category.deleted_at).toLocaleString('vi-VN') %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-success me-2" onclick="restoreCategory(<%- JSON.stringify(category.id) %>)">
+                                                        <i class="fas fa-undo me-1"></i>Khôi Phục
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deleted Nominations -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="fas fa-user me-2"></i>Đề Cử Đã Xóa
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <% if (deletedNominations.length === 0) { %>
+                            <div class="text-center py-4">
+                                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Không có đề cử nào đã bị xóa</p>
+                            </div>
+                        <% } else { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Tên Đề Cử</th>
+                                            <th>Danh Mục</th>
+                                            <th>Mô Tả</th>
+                                            <th>Ngày Xóa</th>
+                                            <th>Thao Tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% deletedNominations.forEach(nomination => { %>
+                                            <tr>
+                                                <td>
+                                                    <strong><%= nomination.name %></strong>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary"><%= nomination.category_name || nomination.category %></span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <%= nomination.description ? nomination.description.substring(0, 50) + '...' : 'Không có mô tả' %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <%= new Date(nomination.deleted_at).toLocaleString('vi-VN') %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-success me-2" onclick="restoreNomination(<%- JSON.stringify(nomination.id) %>)">
+                                                        <i class="fas fa-undo me-1"></i>Khôi Phục
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/admin" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay Lại Trang Quản Lý
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+function restoreCategory(categoryId) {
+    if (confirm('Bạn có chắc muốn khôi phục danh mục này?')) {
+        fetch('/categories/' + categoryId + '/restore', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã khôi phục danh mục thành công!');
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xử lý yêu cầu');
+        });
+    }
+}
+
+function restoreNomination(nominationId) {
+    if (confirm('Bạn có chắc muốn khôi phục đề cử này?')) {
+        fetch('/nominations/' + nominationId + '/restore', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã khôi phục đề cử thành công!');
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xử lý yêu cầu');
+        });
+    }
+}
+</script>

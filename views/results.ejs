@@ -1,0 +1,298 @@
+<style>
+.results-page {
+    font-size: 1.3rem;
+}
+
+.results-page h2 {
+    font-size: 3.5rem;
+    font-weight: bold;
+}
+
+.results-page h4 {
+    font-size: 2.8rem;
+    font-weight: bold;
+}
+
+.results-page h5 {
+    font-size: 2.2rem;
+    font-weight: bold;
+}
+
+.results-page h6 {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.results-page .h4 {
+    font-size: 3rem;
+}
+
+.results-page .h5 {
+    font-size: 2.5rem;
+}
+
+.results-page .card-text {
+    font-size: 1.4rem;
+}
+
+.results-page .text-muted {
+    font-size: 1.4rem;
+}
+
+.results-page small {
+    font-size: 1.2rem;
+}
+
+.results-page .badge {
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+}
+
+.results-page p {
+    font-size: 1.4rem;
+}
+
+.results-page .btn {
+    font-size: 1.6rem;
+    padding: 0.8rem 1.5rem;
+}
+
+.results-page .card-body {
+    padding: 2rem;
+}
+
+.results-page .card-header {
+    padding: 1.5rem 2rem;
+}
+
+.results-page .table {
+    font-size: 1.4rem;
+}
+
+.results-page .table th {
+    font-size: 1.6rem;
+    font-weight: bold;
+    padding: 1rem;
+}
+
+.results-page .table td {
+    font-size: 1.4rem;
+    padding: 1rem;
+}
+</style>
+
+<div class="container py-5 results-page">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-chart-bar me-2 text-primary"></i>Kết Quả Bình Chọn
+                </h2>
+                <% if (user && user.role === 'admin') { %>
+                    <a href="/admin" class="btn btn-outline-primary">
+                        <i class="fas fa-cog me-2"></i>Quản Lý
+                    </a>
+                <% } else { %>
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-2"></i>Về Trang Chủ
+                    </a>
+                <% } %>
+            </div>
+            <p class="text-muted">Thống kê kết quả bình chọn theo từng danh mục</p>
+        </div>
+    </div>
+
+    <% if (Object.keys(results).length === 0) { %>
+        <div class="text-center py-5">
+            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">Chưa có dữ liệu bình chọn</h4>
+            <p class="text-muted">Hãy đợi người dùng thực hiện bình chọn.</p>
+        </div>
+    <% } else { %>
+        <% Object.keys(results).forEach(category => { %>
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tag me-2"></i><%= category %>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <% results[category].forEach((nomination, index) => { %>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body text-center">
+                                        <div class="position-relative mb-3">
+                                            <i class="fas fa-user-circle fa-4x text-primary"></i>
+                                            <% if (index === 0) { %>
+                                                <div class="position-absolute top-0 start-100 translate-middle">
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="fas fa-trophy me-1"></i>1st
+                                                    </span>
+                                                </div>
+                                            <% } else if (index === 1) { %>
+                                                <div class="position-absolute top-0 start-100 translate-middle">
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-medal me-1"></i>2nd
+                                                    </span>
+                                                </div>
+                                            <% } else if (index === 2) { %>
+                                                <div class="position-absolute top-0 start-100 translate-middle">
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-award me-1"></i>3rd
+                                                    </span>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        
+                                        <h6 class="card-title fw-bold mb-2"><%= nomination.name %></h6>
+                                        <p class="card-text text-muted small mb-3"><%= nomination.description %></p>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="text-center">
+                                                <div class="h4 mb-0 text-primary fw-bold">
+                                                    <% if (nomination.vote_count === 0) { %>
+                                                        0
+                                                    <% } else { %>
+                                                        <%= nomination.vote_count %>
+                                                    <% } %>
+                                                </div>
+                                                <small class="text-muted">
+                                                    <% if (nomination.vote_count === 0) { %>
+                                                        Chưa có người bình chọn
+                                                    <% } else if (nomination.vote_count === 1) { %>
+                                                        Có 1 người bình chọn
+                                                    <% } else { %>
+                                                        Có <%= nomination.vote_count %> người bình chọn
+                                                    <% } %>
+                                                </small>
+                                            </div>
+                                            
+                                            <div class="text-center">
+                                                <% 
+                                                const totalVotes = results[category].reduce((sum, n) => sum + n.vote_count, 0);
+                                                const percentage = totalVotes > 0 ? Math.round((nomination.vote_count / totalVotes) * 100) : 0;
+                                                %>
+                                                <div class="h5 mb-0 text-success fw-bold"><%= percentage %>%</div>
+                                                <small class="text-muted">tỷ lệ</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+
+        <!-- Summary Statistics -->
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h4 class="mb-1">
+                            <% 
+                            const totalNominations = Object.values(results).reduce((sum, category) => sum + category.length, 0);
+                            %>
+                            <%= totalNominations %>
+                        </h4>
+                        <p class="mb-0">Tổng số đề cử</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-vote-yea fa-2x mb-2"></i>
+                        <h4 class="mb-1">
+                            <% 
+                            const totalVotes = Object.values(results).reduce((sum, category) => 
+                                sum + category.reduce((catSum, nom) => catSum + nom.vote_count, 0), 0);
+                            %>
+                            <%= totalVotes %>
+                        </h4>
+                        <p class="mb-0">Tổng số phiếu bầu</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tags fa-2x mb-2"></i>
+                        <h4 class="mb-1"><%= Object.keys(results).length %></h4>
+                        <p class="mb-0">Số danh mục</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="card mt-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-download me-2"></i>Xuất Dữ Liệu
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary w-100 mb-2" onclick="exportToCSV()">
+                            <i class="fas fa-file-csv me-2"></i>Xuất CSV
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-success w-100 mb-2" onclick="exportToJSON()">
+                            <i class="fas fa-file-code me-2"></i>Xuất JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<script>
+function exportToCSV() {
+    const data = <%- JSON.stringify(results) %>;
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    Object.keys(data).forEach(category => {
+        csvContent += `\n${category}\n`;
+        csvContent += "Tên,Danh mục,Mô tả,Số phiếu bầu,Tỷ lệ\n";
+        
+        const totalVotes = data[category].reduce((sum, nom) => sum + nom.vote_count, 0);
+        
+        data[category].forEach(nomination => {
+            const percentage = totalVotes > 0 ? ((nomination.vote_count / totalVotes) * 100).toFixed(2) : 0;
+            csvContent += `"${nomination.name}","${nomination.category}","${nomination.description}",${nomination.vote_count},${percentage}%\n`;
+        });
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "ket_qua_binh_chon.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportToJSON() {
+    const data = <%- JSON.stringify(results) %>;
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ket_qua_binh_chon.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+</script>

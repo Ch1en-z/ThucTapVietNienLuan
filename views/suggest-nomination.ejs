@@ -1,0 +1,83 @@
+<!-- Suggest Nomination Section -->
+<style>
+    .form-control {
+        font-size: 2.3rem !important;
+        padding: 1rem 1.5rem !important;
+    }
+    .form-label {
+        font-size: 2.5rem !important;
+        font-weight: 600 !important;
+    }
+    .btn {
+        font-size: 2.2rem !important;
+        padding: 1rem 2rem !important;
+    }
+    h2 {
+        font-size: 3.5rem !important;
+    }
+</style>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white text-center">
+                        <h2 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Đề Cử Thêm Ứng Viên
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Lưu ý:</strong> Đề cử của bạn sẽ được gửi đến quản trị viên để xem xét và phê duyệt.
+                        </div>
+                        
+                        <form action="/suggest-nomination" method="POST">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="fas fa-user me-2"></i>Tên ứng viên đề cử
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       placeholder="Nhập tên ứng viên bạn muốn đề cử" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-info-circle me-2"></i>Lý do đề cử
+                                </label>
+                                <textarea class="form-control" id="description" name="description" 
+                                          rows="4" placeholder="Giải thích lý do tại sao bạn đề cử ứng viên này" required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="category" class="form-label">
+                                    <i class="fas fa-tag me-2"></i>Danh mục đề xuất
+                                </label>
+                                <select class="form-control" id="category" name="category" required>
+                                    <option value="">Chọn danh mục</option>
+                                    <% if (categories && categories.length > 0) { %>
+                                        <% categories.forEach(category => { %>
+                                            <option value="<%= category.name %>"><%= category.name %></option>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <option value="" disabled>Chưa có danh mục nào. Vui lòng liên hệ admin.</option>
+                                    <% } %>
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-paper-plane me-2"></i>Gửi Đề Cử
+                                </button>
+                                <a href="/" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Quay Lại Trang Chủ
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,67 @@
+<!-- Feedback Section -->
+<style>
+    .form-control {
+        font-size: 2.3rem !important;
+        padding: 1rem 1.5rem !important;
+    }
+    .form-label {
+        font-size: 2.5rem !important;
+        font-weight: 600 !important;
+    }
+    .btn {
+        font-size: 2.2rem !important;
+        padding: 1rem 2rem !important;
+    }
+    h2 {
+        font-size: 3.5rem !important;
+    }
+</style>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-info text-white text-center">
+                        <h2 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>Góp Ý
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Lưu ý:</strong> Góp ý của bạn sẽ được gửi đến quản trị viên để xem xét và cải thiện hệ thống.
+                        </div>
+                        
+                        <form action="/feedback" method="POST">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">
+                                    <i class="fas fa-heading me-2"></i>Tiêu đề góp ý
+                                </label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       placeholder="Nhập tiêu đề góp ý của bạn" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-comment me-2"></i>Nội dung góp ý
+                                </label>
+                                <textarea class="form-control" id="description" name="description" 
+                                          rows="6" placeholder="Nhập chi tiết góp ý của bạn..." required></textarea>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-info">
+                                    <i class="fas fa-paper-plane me-2"></i>Gửi Góp Ý
+                                </button>
+                                <a href="/" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Quay Lại Trang Chủ
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

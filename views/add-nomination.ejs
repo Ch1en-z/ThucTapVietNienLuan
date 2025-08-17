@@ -1,0 +1,78 @@
+<!-- Add Nomination Section -->
+<style>
+    .form-control {
+        font-size: 2.3rem !important;
+        padding: 1rem 1.5rem !important;
+    }
+    .form-label {
+        font-size: 2.5rem !important;
+        font-weight: 600 !important;
+    }
+    .btn {
+        font-size: 2.2rem !important;
+        padding: 1rem 2rem !important;
+    }
+    h2 {
+        font-size: 3.5rem !important;
+    }
+</style>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h2 class="mb-0">
+                            <i class="fas fa-user-plus me-2"></i>Thêm Ứng Viên Mới
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="/add-nomination" method="POST">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="fas fa-user me-2"></i>Tên ứng viên
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       placeholder="Nhập tên ứng viên" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-info-circle me-2"></i>Mô tả
+                                </label>
+                                <textarea class="form-control" id="description" name="description" 
+                                          rows="4" placeholder="Nhập mô tả về ứng viên" required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="category" class="form-label">
+                                    <i class="fas fa-tag me-2"></i>Danh mục
+                                </label>
+                                <select class="form-control" id="category" name="category" required>
+                                    <option value="">Chọn danh mục</option>
+                                    <% if (categories && categories.length > 0) { %>
+                                        <% categories.forEach(category => { %>
+                                            <option value="<%= category.name %>"><%= category.name %></option>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <option value="" disabled>Chưa có danh mục nào. Vui lòng tạo danh mục trước.</option>
+                                    <% } %>
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Thêm Ứng Viên
+                                </button>
+                                <a href="/admin" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Quay Lại
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

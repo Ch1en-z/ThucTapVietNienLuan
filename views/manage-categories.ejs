@@ -1,0 +1,385 @@
+<style>
+    /* Category management page font sizes */
+    .container h2 {
+        font-size: 3.5rem !important;
+        font-weight: 700 !important;
+    }
+    .container p {
+        font-size: 2.2rem !important;
+    }
+    
+    /* Table headers */
+    .table thead th {
+        font-size: 2.2rem !important;
+        font-weight: 700 !important;
+        padding: 1.5rem 1rem !important;
+    }
+    
+    /* Table data */
+    .table tbody td {
+        font-size: 1.8rem !important;
+        padding: 1.2rem 1rem !important;
+        vertical-align: middle !important;
+    }
+    
+    /* Badges */
+    .badge {
+        font-size: 1.6rem !important;
+        padding: 0.8rem 1.2rem !important;
+    }
+    
+    /* Buttons */
+    .btn {
+        font-size: 1.8rem !important;
+        padding: 0.8rem 1.5rem !important;
+    }
+    .btn-sm {
+        font-size: 1.6rem !important;
+        padding: 0.6rem 1.2rem !important;
+    }
+    
+    /* Card headers */
+    .card-header h5 {
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+    }
+    
+    /* Modal */
+    .modal-title {
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+    }
+    .modal-body .form-label {
+        font-size: 2rem !important;
+        font-weight: 600 !important;
+    }
+    .modal-body .form-control {
+        font-size: 1.8rem !important;
+        padding: 1rem 1.2rem !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                                 <h2 class="mb-0">
+                     <i class="fas fa-tags me-2 text-primary"></i>Quản Lý Danh Mục & Ứng Viên
+                 </h2>
+                 <div>
+                     <a href="/add-nomination" class="btn btn-outline-success me-2">
+                         <i class="fas fa-user-plus me-2"></i>Thêm Ứng Viên
+                     </a>
+                     <a href="/trash" class="btn btn-outline-warning me-2">
+                         <i class="fas fa-trash me-2"></i>Lịch Sử Xóa
+                     </a>
+                     <a href="/admin" class="btn btn-outline-primary">
+                         <i class="fas fa-cog me-2"></i>Quản Lý
+                     </a>
+                 </div>
+            </div>
+                         <p class="text-muted">Quản lý danh mục và thêm ứng viên cho cuộc bình chọn</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+                         <h5 class="mb-0">
+                 <i class="fas fa-list me-2"></i>Danh Sách Lĩnh Vực
+             </h5>
+             <div>
+                 <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                     <i class="fas fa-plus me-2"></i>Thêm Danh Mục Mới
+                 </button>
+                 <a href="/add-nomination" class="btn btn-success">
+                     <i class="fas fa-user-plus me-2"></i>Thêm Ứng Viên
+                 </a>
+             </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Lĩnh vực</th>
+                            <th>Số đề cử</th>
+                            <th>Thời gian kết thúc</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% categories.forEach(category => { %>
+                            <tr>
+                                <td>
+                                    <strong><%= category.name %></strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info"><%= category.nomination_count %></span>
+                                </td>
+                                <td>
+                                    <% if (category.end_time) { %>
+                                        <span class="text-primary">
+                                            <%= new Date(category.end_time).toLocaleString('vi-VN') %>
+                                        </span>
+                                    <% } else { %>
+                                        <span class="text-muted">Chưa thiết lập</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (category.voting_status === 'active') { %>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Đang hoạt động
+                                        </span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-clock me-1"></i>Đã kết thúc
+                                        </span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-2 edit-category-btn" 
+                                            data-id="<%= category.id %>" 
+                                            data-name="<%= category.name %>" 
+                                            data-end-time="<%= category.end_time %>">
+                                        <i class="fas fa-edit me-1"></i>Chỉnh sửa
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger delete-category-btn" 
+                                            data-id="<%= category.id %>" 
+                                            data-name="<%= category.name %>">
+                                        <i class="fas fa-trash me-1"></i>Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category End Time Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-clock me-2"></i>Chỉnh Sửa Thời Gian Kết Thúc
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editCategoryForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Lĩnh vực</label>
+                        <input type="text" class="form-control" id="categoryName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryEndDate" class="form-label">Ngày kết thúc</label>
+                        <input type="date" class="form-control" id="categoryEndDate" 
+                               min="<%= new Date().toISOString().split('T')[0] %>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryEndTime" class="form-label">Giờ kết thúc</label>
+                        <input type="time" class="form-control" id="categoryEndTime">
+                    </div>
+                    <input type="hidden" id="categoryId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Thêm Danh Mục Mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addCategoryForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newCategoryName" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="newCategoryName" required 
+                               placeholder="Ví dụ: Công nghệ, Giáo dục, Y tế...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryEndDate" class="form-label">Ngày kết thúc (tùy chọn)</label>
+                        <input type="date" class="form-control" id="categoryEndDate" 
+                               min="<%= new Date().toISOString().split('T')[0] %>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryEndTime" class="form-label">Giờ kết thúc (tùy chọn)</label>
+                        <input type="time" class="form-control" id="categoryEndTime">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm Danh Mục</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Edit category form handler
+    document.getElementById('editCategoryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        updateCategoryEndTime();
+    });
+    
+    // Add category form handler
+    document.getElementById('addCategoryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addNewCategory();
+    });
+    
+    // Edit category button event listeners
+    document.querySelectorAll('.edit-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const categoryId = this.getAttribute('data-id');
+            const categoryName = this.getAttribute('data-name');
+            const endTime = this.getAttribute('data-end-time');
+            editCategoryEndTime(categoryId, categoryName, endTime);
+        });
+    });
+    
+    // Delete category button event listeners
+    document.querySelectorAll('.delete-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const categoryId = this.getAttribute('data-id');
+            const categoryName = this.getAttribute('data-name');
+            deleteCategory(categoryId, categoryName);
+        });
+    });
+});
+
+function editCategoryEndTime(categoryId, categoryName, endTime) {
+    document.getElementById('categoryId').value = categoryId;
+    document.getElementById('categoryName').value = categoryName;
+    
+    if (endTime) {
+        const date = new Date(endTime);
+        document.getElementById('categoryEndDate').value = date.toISOString().split('T')[0];
+        document.getElementById('categoryEndTime').value = date.toTimeString().split(' ')[0];
+    } else {
+        document.getElementById('categoryEndDate').value = '';
+        document.getElementById('categoryEndTime').value = '';
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+    modal.show();
+}
+
+function updateCategoryEndTime() {
+    const categoryId = document.getElementById('categoryId').value;
+    const endDate = document.getElementById('categoryEndDate').value;
+    const endTime = document.getElementById('categoryEndTime').value;
+    
+    if (!endDate || !endTime) {
+        alert('Vui lòng chọn đầy đủ ngày và giờ kết thúc');
+        return;
+    }
+    
+    fetch('/update-category-end-time', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            categoryId: categoryId,
+            end_date: endDate,
+            end_time: endTime
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Cập nhật thời gian kết thúc thành công!');
+            location.reload();
+        } else {
+            alert('Có lỗi xảy ra: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi cập nhật');
+    });
+}
+
+function addNewCategory() {
+    const name = document.getElementById('newCategoryName').value.trim();
+    const endDate = document.getElementById('categoryEndDate').value;
+    const endTime = document.getElementById('categoryEndTime').value;
+    
+    if (!name) {
+        alert('Vui lòng nhập tên danh mục');
+        return;
+    }
+    
+    fetch('/add-category', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: name,
+            end_date: endDate,
+            end_time: endTime
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Đã tạo danh mục thành công!');
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
+            modal.hide();
+            document.getElementById('addCategoryForm').reset();
+            // Reload page to show new category
+            location.reload();
+        } else {
+            alert('Có lỗi xảy ra: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi tạo danh mục');
+    });
+}
+
+function deleteCategory(categoryId, categoryName) {
+    if (confirm('Bạn có chắc muốn xóa danh mục "' + categoryName + '"?\n\nDanh mục sẽ được chuyển vào thùng rác và có thể khôi phục sau.')) {
+        fetch('/categories/' + categoryId + '/delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã xóa danh mục thành công!');
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xử lý yêu cầu');
+        });
+    }
+}
+</script>

@@ -1,0 +1,303 @@
+<!-- Suggestions Section -->
+<style>
+    .card-title {
+        font-size: 2.8rem !important;
+        font-weight: bold !important;
+    }
+    .card-text {
+        font-size: 2.3rem !important;
+    }
+    .badge {
+        font-size: 2rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+    .btn {
+        font-size: 2rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+    h2 {
+        font-size: 3.5rem !important;
+    }
+    .text-muted {
+        font-size: 2rem !important;
+    }
+    /* Category management styles */
+    .table thead th {
+        font-size: 2.2rem !important;
+        font-weight: 700 !important;
+        padding: 1.5rem 1rem !important;
+    }
+    .table tbody td {
+        font-size: 1.8rem !important;
+        padding: 1.2rem 1rem !important;
+        vertical-align: middle !important;
+    }
+    .btn-sm {
+        font-size: 1.6rem !important;
+        padding: 0.6rem 1.2rem !important;
+    }
+</style>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-inbox me-2"></i>Quản Lý Góp Ý và Đề Cử
+                </h2>
+                <p class="text-center text-muted">Xem và quản lý tất cả góp ý và đề cử từ người dùng</p>
+            </div>
+        </div>
+
+        <% if (suggestions.length === 0) { %>
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Chưa có góp ý hoặc đề cử nào</h4>
+                <p class="text-muted">Hãy quay lại sau khi có góp ý mới.</p>
+            </div>
+        <% } else { %>
+            <div class="row g-4">
+                <% suggestions.forEach(suggestion => { %>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span class="badge <%= suggestion.type === 'nomination' ? 'bg-success' : 'bg-info' %>">
+                                    <i class="fas <%= suggestion.type === 'nomination' ? 'fa-user-plus' : 'fa-comments' %> me-1"></i>
+                                    <%= suggestion.type === 'nomination' ? 'Đề Cử' : 'Góp Ý' %>
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    <%= new Date(suggestion.created_at).toLocaleDateString('vi-VN') %>
+                                </small>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title"><%= suggestion.title %></h5>
+                                <p class="card-text text-muted"><%= suggestion.description %></p>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>
+                                        <strong>Người gửi:</strong> <%= suggestion.username %>
+                                    </small>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <strong>Ngày gửi:</strong> <%= new Date(suggestion.created_at).toLocaleString('vi-VN') %>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <span class="badge <%= suggestion.status === 'pending' ? 'bg-warning' : 'bg-success' %>">
+                                        <%= suggestion.status === 'pending' ? 'Chờ xử lý' : 'Đã xử lý' %>
+                                    </span>
+                                    <div>
+                                        <% if (suggestion.status === 'pending') { %>
+                                            <button class="btn btn-sm btn-success me-1 mark-processed-btn" data-id="<%= suggestion.id %>">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        <% } %>
+                                        <button class="btn btn-sm btn-danger delete-suggestion-btn" data-id="<%= suggestion.id %>">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <!-- Category Management Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-tags me-2 text-primary"></i>Quản Lý Danh Mục
+                        </h3>
+                        <div>
+                            <a href="/manage-categories" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-cog me-2"></i>Quản Lý Chi Tiết
+                            </a>
+                            <a href="/admin" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay Lại
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Lĩnh vực</th>
+                                        <th>Số đề cử</th>
+                                        <th>Thời gian kết thúc</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                        <% categories.forEach(category => { %>
+                                            <tr>
+                                                <td>
+                                                    <strong><%= category.name %></strong>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info"><%= category.nomination_count || 0 %></span>
+                                                </td>
+                                                <td>
+                                                    <% if (category.end_time) { %>
+                                                        <span class="text-primary">
+                                                            <%= new Date(category.end_time).toLocaleString('vi-VN') %>
+                                                        </span>
+                                                    <% } else { %>
+                                                        <span class="text-muted">Chưa thiết lập</span>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (category.voting_status === 'active') { %>
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i>Đang hoạt động
+                                                        </span>
+                                                    <% } else { %>
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-clock me-1"></i>Đã kết thúc
+                                                        </span>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-danger delete-category-btn" 
+                                                            data-id="<%= category.id %>" 
+                                                            data-name="<%= category.name %>">
+                                                        <i class="fas fa-trash me-1"></i>Xóa
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">
+                                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                                <p>Chưa có danh mục nào</p>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/admin" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay Lại Trang Quản Lý
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark as processed button event listeners
+    document.querySelectorAll('.mark-processed-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const suggestionId = this.getAttribute('data-id');
+            markAsProcessed(suggestionId);
+        });
+    });
+
+    // Delete suggestion button event listeners
+    document.querySelectorAll('.delete-suggestion-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const suggestionId = this.getAttribute('data-id');
+            deleteSuggestion(suggestionId);
+        });
+    });
+
+    // Delete category button event listeners
+    document.querySelectorAll('.delete-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const categoryId = this.getAttribute('data-id');
+            const categoryName = this.getAttribute('data-name');
+            deleteCategory(categoryId, categoryName);
+        });
+    });
+});
+
+function markAsProcessed(suggestionId) {
+    if (confirm('Bạn có chắc muốn đánh dấu đã xử lý?')) {
+        fetch('/suggestions/' + suggestionId + '/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã đánh dấu xử lý thành công!');
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xử lý yêu cầu');
+        });
+    }
+}
+
+function deleteSuggestion(suggestionId) {
+    if (confirm('Bạn có chắc muốn xóa góp ý này?')) {
+        fetch('/suggestions/' + suggestionId + '/delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã xóa góp ý thành công!');
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xử lý yêu cầu');
+        });
+    }
+}
+
+function deleteCategory(categoryId, categoryName) {
+    if (confirm('Bạn có chắc muốn xóa danh mục "' + categoryName + '"?\n\nDanh mục sẽ được chuyển vào thùng rác và có thể khôi phục sau.')) {
+        fetch('/categories/' + categoryId + '/delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã xóa danh mục thành công!');
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xử lý yêu cầu');
+        });
+    }
+}
+</script>
