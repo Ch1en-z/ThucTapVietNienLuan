@@ -1,14 +1,17 @@
 const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
-const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
+const Database = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize database
+let db = null;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,144 +34,20 @@ app.use(session({
 
 app.use(flash());
 
-// Database setup
-const db = new sqlite3.Database('voting.db');
+// Initialize database
+async function startServer() {
+    try {
+        db = new Database();
+        await db.connect();
+        console.log('Database initialized successfully');
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
 
-// Create tables
-db.serialize(() => {
-    // Users table
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        role TEXT DEFAULT 'user',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
-
-    // Categories table
-    db.run(`CREATE TABLE IF NOT EXISTS categories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL,
-        end_time DATETIME,
-        status TEXT DEFAULT 'active',
-        deleted_at DATETIME DEFAULT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
-
-    // Nominations table
-    db.run(`CREATE TABLE IF NOT EXISTS nominations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        description TEXT,
-        category TEXT NOT NULL,
-        image_url TEXT,
-        deleted_at DATETIME DEFAULT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
-
-    // Votes table
-    db.run(`CREATE TABLE IF NOT EXISTS votes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        nomination_id INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users (id),
-        FOREIGN KEY (nomination_id) REFERENCES nominations (id),
-        UNIQUE(user_id, nomination_id)
-    )`);
-
-    // Suggestions table for user feedback and nominations
-    db.run(`CREATE TABLE IF NOT EXISTS suggestions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        type TEXT NOT NULL,
-        title TEXT NOT NULL,
-        description TEXT,
-        status TEXT DEFAULT 'pending',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users (id)
-    )`);
-
-    // Insert default admin user
-    const adminPassword = bcrypt.hashSync('admin123', 10);
-    db.run(`INSERT OR IGNORE INTO users (username, password, email, role) VALUES (?, ?, ?, ?)`, 
-        ['admin', adminPassword, 'admin@example.com', 'admin']);
-
-    // Insert default test user
-    const userPassword = bcrypt.hashSync('user123', 10);
-    db.run(`INSERT OR IGNORE INTO users (username, password, email, role) VALUES (?, ?, ?, ?)`, 
-        ['user', userPassword, 'user@example.com', 'user']);
-
-    // Insert default categories
-    const defaultCategories = [
-        'Công nghệ thông tin',
-        'Điện - Điện tử và Công nghệ vật liệu',
-        'Hóa học',
-        'Sinh học',
-        'Địa lý - Địa chất',
-        'Lý luận chính trị',
-        'Báo chí - Truyền thông',
-        'Môi trường',
-        'Kiến trúc'
-    ];
-
-    defaultCategories.forEach(category => {
-        db.run(`INSERT OR IGNORE INTO categories (name) VALUES (?)`, [category]);
-    });
-
-    // Insert sample categories with different end times
-    const sampleCategories = [
-        ['Công nghệ thông tin', '2024-12-31 23:59:59'],
-        ['Điện - Điện tử và Công nghệ vật liệu', '2024-12-25 23:59:59'],
-        ['Hóa học', '2024-12-28 23:59:59'],
-        ['Sinh học', '2024-12-30 23:59:59'],
-        ['Địa lý - Địa chất', '2024-12-27 23:59:59'],
-        ['Lý luận chính trị', '2024-12-26 23:59:59'],
-        ['Báo chí - Truyền thông', '2024-12-29 23:59:59'],
-        ['Môi trường', '2024-12-31 23:59:59'],
-        ['Kiến trúc', '2024-12-24 23:59:59']
-    ];
-
-    sampleCategories.forEach(cat => {
-        db.run(`INSERT OR IGNORE INTO categories (name, end_time) VALUES (?, ?)`, cat);
-    });
-
-    // Insert sample nominations with only the requested categories
-    const sampleNominations = [
-        ['Nguyễn Văn A', 'Mô tả về ứng viên A', 'Công nghệ thông tin', '/images/nominee1.jpg'],
-        ['Trần Thị B', 'Mô tả về ứng viên B', 'Điện - Điện tử và Công nghệ vật liệu', '/images/nominee2.jpg'],
-        ['Lê Văn C', 'Mô tả về ứng viên C', 'Hóa học', '/images/nominee3.jpg'],
-        ['Phạm Thị D', 'Mô tả về ứng viên D', 'Sinh học', '/images/nominee4.jpg'],
-        ['Hoàng Văn E', 'Mô tả về ứng viên E', 'Địa lý - Địa chất', '/images/nominee5.jpg'],
-        ['Vũ Thị F', 'Mô tả về ứng viên F', 'Lý luận chính trị', '/images/nominee6.jpg'],
-        ['Đặng Văn G', 'Mô tả về ứng viên G', 'Báo chí - Truyền thông', '/images/nominee7.jpg'],
-        ['Ngô Thị H', 'Mô tả về ứng viên H', 'Môi trường', '/images/nominee8.jpg'],
-        ['Bùi Văn I', 'Mô tả về ứng viên I', 'Kiến trúc', '/images/nominee9.jpg']
-    ];
-
-    // Check if sample nominations already exist (including deleted ones)
-    sampleNominations.forEach(nom => {
-        db.get('SELECT COUNT(*) as count FROM nominations WHERE name = ? AND category = ?', 
-            [nom[0], nom[2]], (err, row) => {
-            if (err) {
-                console.error('Error checking nomination:', err);
-                return;
-            }
-            
-            // Only insert if no nomination with this name and category exists
-            if (row.count === 0) {
-                db.run(`INSERT INTO nominations (name, description, category, image_url) VALUES (?, ?, ?, ?)`, nom, function(err) {
-                    if (err) {
-                        console.error('Error inserting sample nomination:', err);
-                    } else {
-                        console.log(`Added sample nomination: ${nom[0]} in ${nom[2]}`);
-                    }
-                });
-            }
-        });
-    });
-});
+// Start the server initialization
+startServer();
 
 // Middleware to check if user is authenticated
 function requireAuth(req, res, next) {
@@ -228,7 +107,7 @@ app.get('/', (req, res) => {
         ORDER BY n.category, n.name
     `;
     
-    db.all(categoriesQuery, (err, categories) => {
+    db.db.all(categoriesQuery, (err, categories) => {
         if (err) {
             console.error(err);
             categories = [];
@@ -239,7 +118,7 @@ app.get('/', (req, res) => {
             console.log(`- ${cat.name}: ${cat.nomination_count} nominations`);
         });
         
-        db.all(nominationsQuery, (err, nominations) => {
+        db.db.all(nominationsQuery, (err, nominations) => {
             if (err) {
                 console.error(err);
                 nominations = [];
@@ -262,7 +141,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     
-    db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
+    db.db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
         if (err) {
             req.flash('error', 'Database error');
             return res.redirect('/login');
@@ -306,7 +185,7 @@ app.post('/register', (req, res) => {
     
     const hashedPassword = bcrypt.hashSync(password, 10);
     
-    db.run('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', 
+    db.db.run('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', 
         [username, hashedPassword, email], function(err) {
         if (err) {
             if (err.message.includes('UNIQUE constraint failed')) {
@@ -334,7 +213,7 @@ app.post('/vote', requireAuth, (req, res) => {
         WHERE n.id = ?
     `;
     
-    db.get(query, [nominationId], (err, result) => {
+    db.db.get(query, [nominationId], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: 'Database error' });
@@ -352,7 +231,7 @@ app.post('/vote', requireAuth, (req, res) => {
         }
         
         // Proceed with voting
-        db.run('INSERT OR REPLACE INTO votes (user_id, nomination_id) VALUES (?, ?)', 
+        db.db.run('INSERT OR REPLACE INTO votes (user_id, nomination_id) VALUES (?, ?)', 
             [userId, nominationId], function(err) {
             if (err) {
                 console.error(err);
@@ -380,7 +259,7 @@ app.get('/results', (req, res) => {
         ORDER BY n.category, vote_count DESC
     `;
     
-    db.all(query, (err, results) => {
+    db.db.all(query, (err, results) => {
         if (err) {
             console.error(err);
             results = [];
@@ -418,7 +297,7 @@ app.get('/admin/results', requireAdmin, (req, res) => {
         ORDER BY n.category, vote_count DESC
     `;
     
-    db.all(query, (err, results) => {
+    db.db.all(query, (err, results) => {
         if (err) {
             console.error(err);
             results = [];
@@ -454,7 +333,7 @@ app.get('/api/nominations', requireAdmin, (req, res) => {
         ORDER BY n.created_at DESC
     `;
     
-    db.all(query, (err, nominations) => {
+    db.db.all(query, (err, nominations) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: 'Database error' });
@@ -474,7 +353,7 @@ app.get('/add-nomination', requireAdmin, (req, res) => {
         ORDER BY name
     `;
     
-    db.all(query, (err, categories) => {
+    db.db.all(query, (err, categories) => {
         if (err) {
             console.error(err);
             categories = [];
@@ -495,7 +374,7 @@ app.post('/add-nomination', requireAdmin, (req, res) => {
         return res.redirect('/add-nomination');
     }
     
-    db.run('INSERT INTO nominations (name, description, category) VALUES (?, ?, ?)', 
+    db.db.run('INSERT INTO nominations (name, description, category) VALUES (?, ?, ?)', 
         [name, description, category], function(err) {
         if (err) {
             req.flash('error', 'Thêm ứng viên thất bại');
@@ -517,7 +396,7 @@ app.get('/suggest-nomination', requireAuth, (req, res) => {
         ORDER BY name
     `;
     
-    db.all(query, (err, categories) => {
+    db.db.all(query, (err, categories) => {
         if (err) {
             console.error(err);
             categories = [];
@@ -539,7 +418,7 @@ app.post('/suggest-nomination', requireAuth, (req, res) => {
         return res.redirect('/suggest-nomination');
     }
     
-    db.run('INSERT INTO suggestions (user_id, type, title, description) VALUES (?, ?, ?, ?)', 
+    db.db.run('INSERT INTO suggestions (user_id, type, title, description) VALUES (?, ?, ?, ?)', 
         [userId, 'nomination', name, `${description} - Danh mục: ${category}`], function(err) {
         if (err) {
             req.flash('error', 'Gửi đề cử thất bại');
@@ -565,7 +444,7 @@ app.post('/feedback', requireAuth, (req, res) => {
         return res.redirect('/feedback');
     }
     
-    db.run('INSERT INTO suggestions (user_id, type, title, description) VALUES (?, ?, ?, ?)', 
+    db.db.run('INSERT INTO suggestions (user_id, type, title, description) VALUES (?, ?, ?, ?)', 
         [userId, 'feedback', title, description], function(err) {
         if (err) {
             req.flash('error', 'Gửi góp ý thất bại');
@@ -594,7 +473,7 @@ app.get('/manage-categories', requireAdmin, (req, res) => {
         ORDER BY c.name
     `;
     
-    db.all(query, (err, categories) => {
+    db.db.all(query, (err, categories) => {
         if (err) {
             console.error(err);
             categories = [];
@@ -620,7 +499,7 @@ app.post('/add-category', requireAdmin, (req, res) => {
         endDateTime = `${end_date} ${end_time}`;
     }
     
-    db.run('INSERT INTO categories (name, end_time) VALUES (?, ?)', 
+    db.db.run('INSERT INTO categories (name, end_time) VALUES (?, ?)', 
         [name, endDateTime], function(err) {
         if (err) {
             console.error(err);
@@ -647,7 +526,7 @@ app.post('/update-category-end-time', requireAdmin, (req, res) => {
         endDateTime = `${end_date} ${end_time}`;
     }
     
-    db.run('UPDATE categories SET end_time = ? WHERE id = ?', 
+    db.db.run('UPDATE categories SET end_time = ? WHERE id = ?', 
         [endDateTime, categoryId], function(err) {
         if (err) {
             console.error(err);
@@ -682,13 +561,13 @@ app.get('/suggestions', requireAdmin, (req, res) => {
         ORDER BY c.name
     `;
     
-    db.all(suggestionsQuery, (err, suggestions) => {
+    db.db.all(suggestionsQuery, (err, suggestions) => {
         if (err) {
             console.error(err);
             suggestions = [];
         }
         
-        db.all(categoriesQuery, (err, categories) => {
+        db.db.all(categoriesQuery, (err, categories) => {
             if (err) {
                 console.error(err);
                 categories = [];
@@ -707,7 +586,7 @@ app.get('/suggestions', requireAdmin, (req, res) => {
 app.post('/suggestions/:id/process', requireAdmin, (req, res) => {
     const suggestionId = req.params.id;
     
-    db.run('UPDATE suggestions SET status = ? WHERE id = ?', 
+    db.db.run('UPDATE suggestions SET status = ? WHERE id = ?', 
         ['processed', suggestionId], function(err) {
         if (err) {
             console.error(err);
@@ -726,7 +605,7 @@ app.post('/suggestions/:id/process', requireAdmin, (req, res) => {
 app.delete('/suggestions/:id/delete', requireAdmin, (req, res) => {
     const suggestionId = req.params.id;
     
-    db.run('DELETE FROM suggestions WHERE id = ?', 
+    db.db.run('DELETE FROM suggestions WHERE id = ?', 
         [suggestionId], function(err) {
         if (err) {
             console.error(err);
@@ -745,7 +624,7 @@ app.delete('/suggestions/:id/delete', requireAdmin, (req, res) => {
 app.delete('/categories/:id/delete', requireAdmin, (req, res) => {
     const categoryId = req.params.id;
     
-    db.run('UPDATE categories SET deleted_at = datetime("now") WHERE id = ?', 
+    db.db.run('UPDATE categories SET deleted_at = datetime("now") WHERE id = ?', 
         [categoryId], function(err) {
         if (err) {
             console.error(err);
@@ -764,7 +643,7 @@ app.delete('/categories/:id/delete', requireAdmin, (req, res) => {
 app.post('/categories/:id/restore', requireAdmin, (req, res) => {
     const categoryId = req.params.id;
     
-    db.run('UPDATE categories SET deleted_at = NULL WHERE id = ?', 
+    db.db.run('UPDATE categories SET deleted_at = NULL WHERE id = ?', 
         [categoryId], function(err) {
         if (err) {
             console.error(err);
@@ -783,7 +662,7 @@ app.post('/categories/:id/restore', requireAdmin, (req, res) => {
 app.delete('/nominations/:id/delete', requireAdmin, (req, res) => {
     const nominationId = req.params.id;
     
-    db.run('UPDATE nominations SET deleted_at = datetime("now") WHERE id = ?', 
+    db.db.run('UPDATE nominations SET deleted_at = datetime("now") WHERE id = ?', 
         [nominationId], function(err) {
         if (err) {
             console.error(err);
@@ -809,7 +688,7 @@ app.post('/nominations/bulk-delete', requireAdmin, (req, res) => {
     const placeholders = nominationIds.map(() => '?').join(',');
     const query = `UPDATE nominations SET deleted_at = datetime("now") WHERE id IN (${placeholders})`;
     
-    db.run(query, nominationIds, function(err) {
+    db.db.run(query, nominationIds, function(err) {
         if (err) {
             console.error(err);
             return res.status(500).json({ success: false, error: 'Database error' });
@@ -827,7 +706,7 @@ app.post('/nominations/bulk-delete', requireAdmin, (req, res) => {
 app.post('/nominations/:id/restore', requireAdmin, (req, res) => {
     const nominationId = req.params.id;
     
-    db.run('UPDATE nominations SET deleted_at = NULL WHERE id = ?', 
+    db.db.run('UPDATE nominations SET deleted_at = NULL WHERE id = ?', 
         [nominationId], function(err) {
         if (err) {
             console.error(err);
@@ -864,13 +743,13 @@ app.get('/trash', requireAdmin, (req, res) => {
         ORDER BY n.deleted_at DESC
     `;
     
-    db.all(categoriesQuery, (err, deletedCategories) => {
+    db.db.all(categoriesQuery, (err, deletedCategories) => {
         if (err) {
             console.error(err);
             deletedCategories = [];
         }
         
-        db.all(nominationsQuery, (err, deletedNominations) => {
+        db.db.all(nominationsQuery, (err, deletedNominations) => {
             if (err) {
                 console.error(err);
                 deletedNominations = [];
